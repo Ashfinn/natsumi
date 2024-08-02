@@ -1,6 +1,9 @@
 # Natsumi
 ![alt text](image.png)
-Rewatch Non Non Biyori at Random
+<br>
+Rewatch Non Non Biyori in a unique order.
+__________
+This is a Python script I made to spice up my 100th Non Non Biyori Rewatch experience.
 
 ## Usage
 Run the excecutable.
