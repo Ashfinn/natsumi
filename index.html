@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natsumi</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.22.9/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Yomogi', cursive;
+            color: #4a3e3b;
+            /* Dark brown text for a softer look */
+        }
+
+        .main-panel {
+            background-color: rgba(253, 250, 240, 0.95);
+            /* Creamy paper color */
+            border: 1px solid #dcd1b8;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 0 0 5px rgba(255, 255, 255, 0.3);
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .header-title {
+            color: #6d5d4d;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.7);
+            border-bottom: 2px dashed #bcae99;
+            padding-bottom: 0.5rem;
+        }
+
+        .wood-button {
+            background-color: #a38560;
+            color: white;
+            border: 2px solid #7a6345;
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 0 #7a6345;
+            font-weight: bold;
+            position: relative;
+            top: 0;
+        }
+
+        .wood-button:hover {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #7a6345;
+        }
+
+        .wood-button.reset {
+            background-color: #c79f9f;
+            border-color: #a17c7c;
+            box-shadow: 0 4px 0 #a17c7c;
+        }
+
+        .wood-button.reset:hover {
+            box-shadow: 0 2px 0 #a17c7c;
+        }
+
+        .episode-card-selected {
+            background: #e9e4d4;
+            border: 2px dashed #bcae99;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .episode-card-selected::before,
+        .episode-card-selected::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 25px;
+            background: rgba(255, 217, 102, 0.5);
+            border: 1px solid rgba(212, 172, 45, 0.5);
+            transform: rotate(-45deg);
+            opacity: 0.8;
+        }
+
+        .episode-card-selected::before {
+            top: -12px;
+            left: -25px;
+        }
+
+        .episode-card-selected::after {
+            bottom: -12px;
+            right: -25px;
+            transform: rotate(135deg);
+        }
+
+        .list-item {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            padding: 0.75rem;
+            border-left: 5px solid #c1d3af;
+            /* Soft green accent */
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(5px);
+        }
+
+        .character-deco {
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+            /* Make sure they don't block clicks */
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const episodes = [
+            { id: 'S1E01', season: 'Season 1', episode: 1, title: 'We Became Transfer Students' },
+            { id: 'S1E02', season: 'Season 1', episode: 2, title: 'We Went to a Candy Store' },
+            { id: 'S1E03', season: 'Season 1', episode: 3, title: 'I Ran Away From Home With My Sister' },
+            { id: 'S1E04', season: 'Season 1', episode: 4, title: 'Summer Vacation Started' },
+            { id: 'S1E05', season: 'Season 1', episode: 5, title: 'I Pretended I Forgot My Swimsuit' },
+            { id: 'S1E06', season: 'Season 1', episode: 6, title: 'I Became a Ghost and Tried Hard' },
+            { id: 'S1E07', season: 'Season 1', episode: 7, title: 'Our Rice Crackers Turned into Curry' },
+            { id: 'S1E08', season: 'Season 1', episode: 8, title: 'We Cooked Rice at School' },
+            { id: 'S1E09', season: 'Season 1', episode: 9, title: 'We Had a Culture Festival' },
+            { id: 'S1E10', season: 'Season 1', episode: 10, title: 'We Watched the First Sunrise of the Year' },
+            { id: 'S1E11', season: 'Season 1', episode: 11, title: 'We Made Snow Houses' },
+            { id: 'S1E12', season: 'Season 1', episode: 12, title: 'Spring Came Again' },
+            { id: 'S2E01', season: 'Repeat', episode: 1, title: 'I Became a First Grader' },
+            { id: 'S2E02', season: 'Repeat', episode: 2, title: 'We Went to See the Stars' },
+            { id: 'S2E03', season: 'Repeat', episode: 3, title: 'We Got Excited During the Holidays' },
+            { id: 'S2E04', season: 'Repeat', episode: 4, title: 'I Made a Teru-teru Bozu' },
+            { id: 'S2E05', season: 'Repeat', episode: 5, title: 'We Ate Okonomiyaki' },
+            { id: 'S2E06', season: 'Repeat', episode: 6, title: 'We Made Friends With a Firefly' },
+            { id: 'S2E07', season: 'Repeat', episode: 7, title: 'We Bravely Dove In' },
+            { id: 'S2E08', season: 'Repeat', episode: 8, title: 'I Took Care of the Babies' },
+            { id: 'S2E09', season: 'Repeat', episode: 9, title: 'We Looked at the Moon Together' },
+            { id: 'S2E10', season: 'Repeat', episode: 10, title: 'We Practiced Really Hard' },
+            { id: 'S2E11', season: 'Repeat', episode: 11, title: 'I Acted Spoiled' },
+            { id: 'S2E12', season: 'Repeat', episode: 12, title: 'A Year Passed' },
+            { id: 'S3E01', season: 'Nonstop', episode: 1, title: 'I Played the Recorder' },
+            { id: 'S3E02', season: 'Nonstop', episode: 2, title: 'Hotaru Was Grown-Up' },
+            { id: 'S3E03', season: 'Nonstop', episode: 3, title: 'A Past Self Was Revived' },
+            { id: 'S3E04', season: 'Nonstop', episode: 4, title: 'I Made a Watermelon Monster' },
+            { id: 'S3E05', season: 'Nonstop', episode: 5, title: 'I Cooked Something Amazing' },
+            { id: 'S3E06', season: 'Nonstop', episode: 6, title: 'We All Went Camping' },
+            { id: 'S3E07', season: 'Nonstop', episode: 7, title: 'The Cicadas Cried in the Rain' },
+            { id: 'S3E08', season: 'Nonstop', episode: 8, title: 'My Big Sister Did a Great Job' },
+            { id: 'S3E09', season: 'Nonstop', episode: 9, title: 'We Made Delicious Food' },
+            { id: 'S3E10', season: 'Nonstop', episode: 10, title: 'The Cold Wind Blew' },
+            { id: 'S3E11', season: 'Nonstop', episode: 11, title: 'I Was Fooled By Everyone' },
+            { id: 'S3E12', season: 'Nonstop', episode: 12, title: 'The Journey Was Fun' },
+            { id: 'MOVIE', season: 'Movie', episode: null, title: 'Vacation' }
+        ];
+
+        function App() {
+            const [watchedEpisodes, setWatchedEpisodes] = useState([]);
+            const [unwatchedEpisodes, setUnwatchedEpisodes] = useState(episodes);
+            const [randomEpisode, setRandomEpisode] = useState(null);
+
+            useEffect(() => {
+                const storedWatched = JSON.parse(localStorage.getItem('watchedEpisodes') || '[]');
+                setWatchedEpisodes(storedWatched);
+                setUnwatchedEpisodes(episodes.filter(ep => !storedWatched.includes(ep.id)));
+            }, []);
+
+            const pickRandomEpisode = () => {
+                if (unwatchedEpisodes.length === 0) {
+                    alert('Nyanpasu! You’ve watched everything! How about starting over?');
+                    return;
+                }
+                const randomIndex = Math.floor(Math.random() * unwatchedEpisodes.length);
+                const selectedEpisode = unwatchedEpisodes[randomIndex];
+                setRandomEpisode(selectedEpisode);
+            };
+
+            const markAsWatched = () => {
+                if (!randomEpisode) return;
+                const newWatched = [...watchedEpisodes, randomEpisode.id];
+                const newUnwatched = unwatchedEpisodes.filter(ep => ep.id !== randomEpisode.id);
+                setWatchedEpisodes(newWatched);
+                setUnwatchedEpisodes(newUnwatched);
+                localStorage.setItem('watchedEpisodes', JSON.stringify(newWatched));
+                setRandomEpisode(null);
+            };
+
+            const resetLists = () => {
+                setWatchedEpisodes([]);
+                setUnwatchedEpisodes(episodes);
+                localStorage.setItem('watchedEpisodes', '[]');
+                setRandomEpisode(null);
+            };
+
+            return (
+                <div className="max-w-3xl w-full main-panel">
+                    <img src="img/renge.png" alt="Renge" className="character-deco" style={{ height: '150px', bottom: '-20px', left: '-20px', transform: 'rotate(-5deg)' }} />
+                    <img src="img/hotaru.png" alt="Hotaru" className="character-deco" style={{ height: '125px', top: '-10px', right: '-40px', transform: 'rotate(5deg)' }} />
+                    <img src="img/natsumi.png" alt="Natsumi" className="character-deco" style={{ height: '125px', top: '-10px', left: '-40px', transform: 'rotate(-10deg)' }} />
+                    <img src="img/komari.png" alt="Komari" className="character-deco" style={{ height: '100px', bottom: '-15px', right: '-20px', transform: 'rotate(8deg)' }} />
+
+                    <h1 className="header-title text-4xl font-bold text-center py-4">
+                        Natsumi's Random Episode Picker
+                    </h1>
+                    <p className="text-center text-gray-600 mt-3 text-lg italic">
+                        Let's pick something to watch!
+                    </p>
+                    <div className="mt-6">
+                        <button
+                            onClick={pickRandomEpisode}
+                            className="wood-button w-full py-3 px-4 text-xl"
+                        >
+                            Pick a Random Episode!
+                        </button>
+                    </div>
+                    {randomEpisode && (
+                        <div className="mt-6 p-5 episode-card-selected">
+                            <h2 className="text-2xl font-semibold" style={{ color: '#8c7a6b' }}>
+                                Let's Watch This One:
+                            </h2>
+                            <p className="mt-2 text-lg">
+                                <span className="font-bold">{randomEpisode.season}</span>
+                                {randomEpisode.episode ? ` Episode ${randomEpisode.episode}` : ''}: {randomEpisode.title}
+                            </p>
+                            <button
+                                onClick={markAsWatched}
+                                className="wood-button mt-4 py-2 px-5 text-base"
+                            >
+                                Finished Watching!
+                            </button>
+                        </div>
+                    )}
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 className="text-2xl font-semibold" style={{ color: '#93a785' }}>Watched Episodes</h3>
+                            <ul className="mt-2 p-2 max-h-48 overflow-y-auto rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
+                                {watchedEpisodes.length === 0 ? (
+                                    <li className="list-item">No episodes watched yet!</li>
+                                ) : (
+                                    watchedEpisodes.map(id => {
+                                        const ep = episodes.find(e => e.id === id);
+                                        return (
+                                            <li key={id} className="list-item text-sm">
+                                                {ep.season} {ep.episode ? `Ep ${ep.episode}` : ''}: {ep.title}
+                                            </li>
+                                        );
+                                    })
+                                )}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-semibold" style={{ color: '#93a785' }}>Unwatched Episodes</h3>
+                            <ul className="mt-2 p-2 max-h-48 overflow-y-auto rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
+                                {unwatchedEpisodes.length === 0 ? (
+                                    <li className="list-item">You've seen them all!</li>
+                                ) : (
+                                    unwatchedEpisodes.map(ep => (
+                                        <li key={ep.id} className="list-item text-sm">
+                                            {ep.season} {ep.episode ? `Ep ${ep.episode}` : ''}: {ep.title}
+                                        </li>
+                                    ))
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="mt-8">
+                        <button
+                            onClick={resetLists}
+                            className="wood-button reset w-full py-3 px-4 text-lg"
+                        >
+                            Reset Watched List
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
